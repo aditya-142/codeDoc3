@@ -3,6 +3,3 @@ langchain
 openai
 python-dotenv
 GitPython
-ast
-dataclasses
-typing-extensions
