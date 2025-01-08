@@ -1,21 +1,42 @@
-import openai
-import os
-from llama_index.llms.openai import OpenAI
-from llama_index.agent.openai import OpenAIAgent
-from llama_index.tools.code_interpreter.base import CodeInterpreterToolSpec
+import streamlit as st
+from langchain import OpenAI
+from langchain.agents import initialize_agent, Tool, AgentType
+from langchain.tools import PythonREPLTool
 
 def return_agent():
-	# API config
-	openai.api_type = "azure"
-	openai.api_base = os.getenv("AZURE_API_BASE")  # Or use st.secrets['AZURE_API_BASE']
-	openai.api_version = os.getenv("AZURE_OPENAI_API_VERSION")  # Or st.secrets
-	openai.api_key = os.getenv("AZURE_API_KEY")  # Or st.secrets
+	"""
+	Initialize and return a LangChain-based agent with Python REPL tool.
+	Configures Azure OpenAI as the language model backend.
+	"""
+	# API config (Azure OpenAI integration)
+	openai_api_key = st.secrets['AZURE_API_KEY']
+	openai_api_base = st.secrets['AZURE_API_BASE']
+	openai_api_version = st.secrets['AZURE_OPENAI_API_VERSION']
 
-	code_spec = CodeInterpreterToolSpec()
-	tools = code_spec.to_tool_list()
-	agent = OpenAIAgent.from_tools(
-    	tools,
-    	llm=OpenAI(temperature=0, model="gpt-4o"),  
+	# Initialize LangChain LLM
+	llm = OpenAI(
+    	model_name="gpt-4",
+    	temperature=0,
+    	api_key=openai_api_key,
+    	api_base=openai_api_base,
+    	api_version=openai_api_version
+	)
+
+	# Define tools (e.g., Python REPL)
+	tools = [
+    	Tool(
+        	name="Python REPL",
+        	func=PythonREPLTool().run,
+        	description="A tool for running Python code and interpreting the results."
+    	)
+	]
+
+	# Initialize the agent
+	agent = initialize_agent(
+    	tools=tools,
+    	llm=llm,
+    	agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
     	verbose=True
 	)
+
 	return agent
