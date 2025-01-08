@@ -15,7 +15,7 @@ def return_agent():
 
 	# Initialize LangChain LLM
 	llm = OpenAI(
-    	model_name="gpt-4",
+    	model_name="gpt-4o",
     	temperature=0,
     	api_key=openai_api_key,
     	api_base=openai_api_base,
